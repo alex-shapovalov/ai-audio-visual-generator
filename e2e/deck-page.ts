@@ -3,8 +3,30 @@ import { expect, type FileChooser, type Locator, type Page } from "@playwright/t
 export type TabName = "Live" | "Media" | "Tracks" | "Settings"
 export type Upload = Parameters<FileChooser["setFiles"]>[0]
 
+type MeterWindow = Window & { __meters?: Record<string, number[]> }
+
 export class DeckPage {
   constructor(readonly page: Page) {}
+
+  async recordMeter(label: string) {
+    await this.page.evaluate((name) => {
+      const meter = document.querySelector(`[role="meter"][aria-label="${name}"]`)
+      if (!meter) throw new Error(`No meter named ${name}`)
+      const read = () => Number(meter.getAttribute("aria-valuenow"))
+      const values = [read()]
+      new MutationObserver(() => values.push(read())).observe(meter, {
+        attributes: true,
+        attributeFilter: ["aria-valuenow"],
+      })
+      const meters = (window as MeterWindow).__meters ?? {}
+      meters[name] = values
+      ;(window as MeterWindow).__meters = meters
+    }, label)
+  }
+
+  meterValues(label: string): Promise<number[]> {
+    return this.page.evaluate((name) => [...((window as MeterWindow).__meters?.[name] ?? [])], label)
+  }
 
   async open() {
     await this.page.goto("/")

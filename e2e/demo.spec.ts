@@ -7,22 +7,21 @@ test("the built-in demo drives the meters, the tempo and every section", async (
   await deck.open()
   await deck.runDemo()
   await expect(page.getByTestId("source-label")).toHaveText("Built-in 128 BPM loop")
+  await deck.recordMeter("Sub")
 
   const sections = new Set<string>()
-  const subLevels: number[] = []
   await expect
     .poll(
       async () => {
         const section = (await page.getByLabel("Section", { exact: true }).textContent()) ?? ""
         sections.add(section.trim().toLowerCase())
-        const sub = await page.getByRole("meter", { name: "Sub" }).getAttribute("aria-valuenow")
-        subLevels.push(Number(sub))
         return [...sections].sort()
       },
       { timeout: 90_000, intervals: [150] },
     )
     .toEqual(["breakdown", "build", "drop", "groove"])
 
+  const subLevels = await deck.meterValues("Sub")
   expect(Math.max(...subLevels)).toBeGreaterThan(0.6)
   expect(Math.min(...subLevels)).toBeLessThan(0.3)
 
