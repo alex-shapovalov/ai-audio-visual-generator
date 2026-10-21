@@ -11,6 +11,9 @@ pub mod synth;
 pub mod wav;
 pub mod window;
 
+#[cfg(target_arch = "wasm32")]
+mod wasm;
+
 pub use analyzer::{Analyzer, Frame};
 pub use bands::{BandLevels, BandReader};
 pub use beat::{BeatState, BeatTracker, MIN_GAP_MS};
