@@ -21,6 +21,13 @@ export class MatcherClient {
     this.worker.onerror = (event) => this.onError?.(event.message || "The matcher worker crashed")
   }
 
+  subscribe(listener: (status: MatchStatus) => void) {
+    this.onStatus = listener
+    return () => {
+      if (this.onStatus === listener) this.onStatus = null
+    }
+  }
+
   private receive(message: FromMatcher) {
     if (message.type === "status") {
       this.onStatus?.(message.status)

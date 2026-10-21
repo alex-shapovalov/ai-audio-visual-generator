@@ -1,0 +1,57 @@
+"use client"
+
+import { LiveTab } from "@/components/deck/live-tab"
+import { MediaTab } from "@/components/deck/media-tab"
+import { SettingsTab } from "@/components/deck/settings-tab"
+import { TracksTab } from "@/components/deck/tracks-tab"
+import type { Deck } from "@/components/deck/use-deck"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { cn } from "@/lib/utils"
+
+type ControlPanelProps = { deck: Deck; onHide: () => void }
+
+export function ControlPanel({ deck, onHide }: ControlPanelProps) {
+  return (
+    <aside
+      aria-label="Controls"
+      className={cn(
+        "fixed z-20 flex flex-col border-border bg-background/85 text-foreground shadow-2xl backdrop-blur-xl",
+        "inset-x-0 bottom-0 max-h-[68vh] rounded-t-2xl border-t",
+        "md:inset-y-0 md:right-0 md:left-auto md:max-h-none md:w-[26rem] md:rounded-none md:border-t-0 md:border-l",
+      )}
+    >
+      <header className="flex items-center justify-between gap-3 px-4 pt-3 pb-2">
+        <div>
+          <h1 className="text-sm font-semibold tracking-wide">Afterimage</h1>
+          <p className="text-[0.7rem] text-muted-foreground">1–5 scenes · A auto · H hide · F fullscreen</p>
+        </div>
+        <Button type="button" size="sm" variant="ghost" onClick={onHide}>
+          Hide
+        </Button>
+      </header>
+      <Tabs defaultValue="live" className="min-h-0 flex-1 gap-0 px-4 pb-4">
+        <TabsList className="w-full">
+          <TabsTrigger value="live">Live</TabsTrigger>
+          <TabsTrigger value="media">Media</TabsTrigger>
+          <TabsTrigger value="tracks">Tracks</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+        </TabsList>
+        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+          <TabsContent value="live">
+            <LiveTab deck={deck} />
+          </TabsContent>
+          <TabsContent value="media">
+            <MediaTab deck={deck} />
+          </TabsContent>
+          <TabsContent value="tracks">
+            <TracksTab deck={deck} />
+          </TabsContent>
+          <TabsContent value="settings">
+            <SettingsTab deck={deck} />
+          </TabsContent>
+        </div>
+      </Tabs>
+    </aside>
+  )
+}

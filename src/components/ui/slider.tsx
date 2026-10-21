@@ -1,6 +1,17 @@
 import { Slider as SliderPrimitive } from "@base-ui/react/slider"
 import { cn } from "@/lib/utils"
 
+function thumbValues(
+  value: SliderPrimitive.Root.Props["value"],
+  defaultValue: SliderPrimitive.Root.Props["defaultValue"],
+  min: number,
+  max: number
+) {
+  if (Array.isArray(value)) return value
+  if (Array.isArray(defaultValue)) return defaultValue
+  return [min, max]
+}
+
 function Slider({
   className,
   defaultValue,
@@ -9,11 +20,7 @@ function Slider({
   max = 100,
   ...props
 }: SliderPrimitive.Root.Props) {
-  const _values = Array.isArray(value)
-    ? value
-    : Array.isArray(defaultValue)
-      ? defaultValue
-      : [min, max]
+  const _values = thumbValues(value, defaultValue, min, max)
 
   return (
     <SliderPrimitive.Root

@@ -143,6 +143,22 @@ describe("MatcherClient with the real session behind a structured-clone boundary
     expect(statuses.filter((status) => status.listenedSeconds < 3.5).length).toBe(2)
   })
 
+  it("stops delivering statuses after unsubscribing, without disturbing a newer listener", async () => {
+    const { MatcherClient } = await loadFreshRuntime()
+    const client = new MatcherClient()
+    const first: MatchStatus[] = []
+    const second: MatchStatus[] = []
+    const unsubscribeFirst = client.subscribe((status) => first.push(status))
+    client.subscribe((status) => second.push(status))
+    unsubscribeFirst()
+
+    client.setLibrary(await libraryOf(tracks))
+    pushInChunks(client, excerpt(tracks[0].samples, 5, 5))
+    await vi.waitFor(() => expect(second.length).toBeGreaterThanOrEqual(2))
+    client.dispose()
+    expect(first).toHaveLength(0)
+  })
+
   it("reports a rejected library through onError", async () => {
     const { MatcherClient } = await loadFreshRuntime()
     const client = new MatcherClient()
