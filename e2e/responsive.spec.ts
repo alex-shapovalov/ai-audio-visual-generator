@@ -28,7 +28,7 @@ test.describe("on a phone", () => {
     await page.getByRole("button", { name: "Run built-in demo" }).tap()
     await expect(page.getByTestId("source-label")).toHaveText("Built-in 128 BPM loop")
 
-    for (const tab of ["Media", "Tracks", "Settings", "Live"] as const) {
+    for (const tab of ["Media", "Tracks", "Live"] as const) {
       await page.getByRole("tab", { name: tab }).tap()
       await expect(page.getByRole("tab", { name: tab })).toHaveAttribute("aria-selected", "true")
     }

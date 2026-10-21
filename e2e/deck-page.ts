@@ -1,6 +1,6 @@
 import { expect, type FileChooser, type Locator, type Page } from "@playwright/test"
 
-export type TabName = "Live" | "Media" | "Tracks" | "Settings"
+export type TabName = "Live" | "Media" | "Tracks"
 export type Upload = Parameters<FileChooser["setFiles"]>[0]
 
 type MeterWindow = Window & { __meters?: Record<string, number[]> }

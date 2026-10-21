@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { requestLook, requestLookOrFallback } from "@/lib/look-client"
 import { DEFAULT_LOOK } from "@/lib/palettes"
-import { KEY_HEADER } from "@/lib/openrouter"
 
 const fetchMock = vi.fn<typeof fetch>()
 
@@ -21,35 +20,25 @@ describe("requestLook", () => {
     const response = { look: DEFAULT_LOOK, reason: "fits", source: "openrouter" }
     answer(response)
 
-    await expect(requestLook(request, "")).resolves.toEqual(response)
+    await expect(requestLook(request)).resolves.toEqual(response)
 
     const [url, init] = fetchMock.mock.calls[0]
     expect(url).toBe("/api/look")
     expect(init?.method).toBe("POST")
+    expect(init?.headers).toEqual({ "content-type": "application/json" })
     expect(JSON.parse(String(init?.body))).toEqual(request)
-  })
-
-  it("sends the OpenRouter key header only when a key is set", async () => {
-    vi.stubGlobal("fetch", fetchMock)
-    answer({ look: DEFAULT_LOOK, reason: "", source: "heuristic" })
-
-    await requestLook(request, "")
-    await requestLook(request, "user-key")
-
-    expect(fetchMock.mock.calls[0][1]?.headers).not.toHaveProperty(KEY_HEADER)
-    expect(fetchMock.mock.calls[1][1]?.headers).toMatchObject({ [KEY_HEADER]: "user-key" })
   })
 
   it("throws with the status code when the service fails", async () => {
     vi.stubGlobal("fetch", fetchMock)
     answer({ error: "Invalid request body" }, 400)
-    await expect(requestLook(request, "")).rejects.toThrow("returned 400")
+    await expect(requestLook(request)).rejects.toThrow("returned 400")
   })
 
   it("propagates a network failure", async () => {
     vi.stubGlobal("fetch", fetchMock)
     fetchMock.mockRejectedValue(new TypeError("Failed to fetch"))
-    await expect(requestLook(request, "")).rejects.toThrow("Failed to fetch")
+    await expect(requestLook(request)).rejects.toThrow("Failed to fetch")
   })
 })
 
@@ -60,14 +49,14 @@ describe("requestLookOrFallback", () => {
     vi.stubGlobal("fetch", fetchMock)
     const response = { look: DEFAULT_LOOK, reason: "fits", source: "openrouter" }
     answer(response)
-    await expect(requestLookOrFallback(dubstep, "")).resolves.toEqual(response)
+    await expect(requestLookOrFallback(dubstep)).resolves.toEqual(response)
   })
 
   it("uses the local heuristic with a note when the service is unreachable", async () => {
     vi.stubGlobal("fetch", fetchMock)
     fetchMock.mockRejectedValue(new TypeError("Failed to fetch"))
 
-    const result = await requestLookOrFallback(dubstep, "")
+    const result = await requestLookOrFallback(dubstep)
 
     expect(result.source).toBe("heuristic")
     expect(result.look.scene).toBe("rift")
@@ -78,7 +67,7 @@ describe("requestLookOrFallback", () => {
     vi.stubGlobal("fetch", fetchMock)
     answer({ error: "boom" }, 500)
 
-    const result = await requestLookOrFallback(dubstep, "")
+    const result = await requestLookOrFallback(dubstep)
 
     expect(result.source).toBe("heuristic")
     expect(result.note).toContain("500")

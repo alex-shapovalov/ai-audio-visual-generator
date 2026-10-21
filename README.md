@@ -34,7 +34,7 @@ Audio input needs a secure context. `localhost` and `127.0.0.1` count as secure.
 
 ## Using the deck
 
-The panel has four tabs. Keys: `1`-`5` pick a scene, `A` toggles auto cues, `H` hides the panel, `F` toggles
+The panel has three tabs. Keys: `1`-`5` pick a scene, `A` toggles auto cues, `H` hides the panel, `F` toggles
 fullscreen. Keys are ignored while you type in a field.
 
 | Tab | What it does |
@@ -42,7 +42,6 @@ fullscreen. Keys are ignored while you type in a field.
 | Live | Choose the input, watch the meters, edit the look, set the strobe master, see the recognition readout, describe a vibe |
 | Media | Add images and videos, rename or delete them, click one to use it in the current look |
 | Tracks | Enroll tracks, edit each track's look, ask the AI for a suggestion |
-| Settings | Store an OpenRouter key in this browser |
 
 Inputs: **Connect input** asks for microphone permission and lists the devices. **Play a file as input**
 plays the file through your speakers, which is only meant for testing. Live inputs never reach the speakers.
@@ -63,9 +62,8 @@ wants two consecutive agreeing windows.
 
 The browser never calls OpenRouter. It posts to this app's `/api/look` route, which calls OpenRouter.
 
-The key can come from `.env.local` (gitignored) or from the Settings tab. The Settings key is kept in
-`localStorage` and sent to `/api/look` in the `x-openrouter-key` header, which wins over the environment key.
-Never commit a key. If a key has been pasted anywhere it should not have been, rotate it.
+The key comes from `.env.local` (gitignored). The app has no key field, and `/api/look` ignores any key a caller
+sends. Never commit a key. If a key has been pasted anywhere it should not have been, rotate it.
 
 | Variable | Purpose | Default |
 |---|---|---|
@@ -138,7 +136,7 @@ stale wasm in this checkout's build. Run `cargo clean` before rebuilding if you 
 |---|---|---|
 | Rust | `cargo test --workspace` | DSP, matcher, beat guard, CLI, and `parity.rs`, which pins values captured from the original TypeScript implementation |
 | Vitest | `pnpm test` | The wasm boundary, matcher worker protocol, IndexedDB, look schema and heuristic, `/api/look`, renderer look state |
-| Playwright | `pnpm test:e2e` | The deck in Chromium: scenes, media, enrollment, recognition, manual override, settings, mobile layout, strobe rate |
+| Playwright | `pnpm test:e2e` | The deck in Chromium: scenes, media, enrollment, recognition, manual override, describe a look, mobile layout, strobe rate |
 
 Notes:
 

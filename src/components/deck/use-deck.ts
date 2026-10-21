@@ -7,7 +7,6 @@ import { useLookControl } from "@/components/deck/use-look-control"
 import { useMatching } from "@/components/deck/use-matching"
 import { useMediaBinding } from "@/components/deck/use-media-binding"
 import { useMeters } from "@/components/deck/use-meters"
-import { useOpenRouterKey } from "@/components/deck/use-open-router-key"
 import { useRuntime } from "@/components/deck/use-runtime"
 import { useSource } from "@/components/deck/use-source"
 import { errorMessage } from "@/lib/error-message"
@@ -33,12 +32,11 @@ export const useDeck = (canvasRef: RefObject<HTMLCanvasElement | null>) => {
     control.clearActiveCue()
   })
   const meters = useMeters(runtime)
-  const apiKey = useOpenRouterKey()
 
   const activeMedia = library.media.find((item) => item.id === control.look.mediaId) ?? null
   const mediaBinding = useMediaBinding(runtime, activeMedia)
 
-  const suggest = (request: LookRequest) => requestLookOrFallback(request, apiKey.key)
+  const suggest = (request: LookRequest) => requestLookOrFallback(request)
   const enrollment = useEnrollment({ runtime, library, suggest })
 
   const [described, setDescribed] = useState<LookResponse | null>(null)
@@ -106,7 +104,6 @@ export const useDeck = (canvasRef: RefObject<HTMLCanvasElement | null>) => {
     matching,
     source,
     meters,
-    apiKey,
     enrollment,
     activeMedia,
     mediaError: mediaBinding.error,

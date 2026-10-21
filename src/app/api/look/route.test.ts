@@ -8,11 +8,11 @@ const MEDIA = [{ id: "clip", name: "clip.mp4" }]
 
 const fetchMock = vi.fn<typeof fetch>()
 
-const call = (body: unknown, headers: Record<string, string> = {}) =>
+const call = (body: unknown) =>
   POST(
     new Request("http://localhost/api/look", {
       method: "POST",
-      headers: { "content-type": "application/json", ...headers },
+      headers: { "content-type": "application/json" },
       body: typeof body === "string" ? body : JSON.stringify(body),
     }),
   )
@@ -174,11 +174,17 @@ describe("POST /api/look with OpenRouter", () => {
     expect(body.model).toBe("anthropic/claude-test")
   })
 
-  it("prefers the key sent by the client over the environment key", async () => {
+  it("authenticates with the environment key and ignores any key header from the caller", async () => {
     fetchMock.mockResolvedValue(reply(modelLook()))
-    await call({ media: [] }, { "x-openrouter-key": "client-key-not-real" })
+    await POST(
+      new Request("http://localhost/api/look", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-openrouter-key": "caller-key-not-real" },
+        body: JSON.stringify({ media: [] }),
+      }),
+    )
     const init = fetchMock.mock.calls[0][1]
-    expect(init?.headers).toMatchObject({ Authorization: "Bearer client-key-not-real" })
+    expect(init?.headers).toMatchObject({ Authorization: `Bearer ${TEST_KEY}` })
   })
 })
 

@@ -2,7 +2,6 @@
 
 import { LiveTab } from "@/components/deck/live-tab"
 import { MediaTab } from "@/components/deck/media-tab"
-import { SettingsTab } from "@/components/deck/settings-tab"
 import { TracksTab } from "@/components/deck/tracks-tab"
 import type { Deck } from "@/components/deck/use-deck"
 import { Button } from "@/components/ui/button"
@@ -35,7 +34,6 @@ export function ControlPanel({ deck, onHide }: ControlPanelProps) {
           <TabsTrigger value="live">Live</TabsTrigger>
           <TabsTrigger value="media">Media</TabsTrigger>
           <TabsTrigger value="tracks">Tracks</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
           <TabsContent value="live">
@@ -46,9 +44,6 @@ export function ControlPanel({ deck, onHide }: ControlPanelProps) {
           </TabsContent>
           <TabsContent value="tracks">
             <TracksTab deck={deck} />
-          </TabsContent>
-          <TabsContent value="settings">
-            <SettingsTab deck={deck} />
           </TabsContent>
         </div>
       </Tabs>
