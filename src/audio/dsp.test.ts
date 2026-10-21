@@ -54,6 +54,29 @@ const tracked = <T extends { dispose(): void }>(item: T) => {
   return item
 }
 
+const FRAME_MS = 1000 / 60
+const KICK_GUARD_MS = 240
+const ANALYZER_BINS = 1024
+const SUB_BIN = 3
+
+const kickTimes = async (pulseEveryFrames: number, seconds: number) => {
+  const analyzer = tracked(await Analyzer.create(48000, ANALYZER_BINS))
+  const silence = new Float32Array(ANALYZER_BINS).fill(-120)
+  const pulse = silence.slice()
+  pulse[SUB_BIN] = -10
+  const frame = emptyFrame()
+  const times: number[] = []
+  for (let index = 0; index < seconds * 60; index++) {
+    const now = index * FRAME_MS
+    analyzer.tick(index % pulseEveryFrames === 0 ? pulse : silence, now, FRAME_MS / 1000)
+    analyzer.readFrame(frame)
+    if (frame.kick === 1) times.push(now)
+  }
+  return times
+}
+
+const gapsBetween = (times: number[]) => times.slice(1).map((time, index) => time - times[index])
+
 type DemoTrack = { id: string; samples: Float32Array }
 
 let tracks: DemoTrack[] = []
@@ -200,6 +223,18 @@ describe("Analyzer through the wasm boundary", () => {
     analyzer.readFrame(frame)
     expect(frame.sub).toBeGreaterThan(0.9)
     expect(frame.air).toBeLessThan(0.01)
+  })
+
+  it("never reports two kicks closer than 240 ms, however fast the pulses arrive", async () => {
+    const gaps = gapsBetween(await kickTimes(6, 10))
+    expect(gaps.length).toBeGreaterThan(20)
+    expect(Math.min(...gaps)).toBeGreaterThan(KICK_GUARD_MS)
+  })
+
+  it("reports every pulse of a groove slower than the guard", async () => {
+    const times = await kickTimes(30, 10)
+    expect(times).toHaveLength(19)
+    for (const gap of gapsBetween(times)) expect(gap).toBeCloseTo(500, 1)
   })
 
   it("decays levels when idle", async () => {
