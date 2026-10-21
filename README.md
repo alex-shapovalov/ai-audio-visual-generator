@@ -50,6 +50,10 @@ There are three pages:
    `F` toggles fullscreen again.
 3. Connect your input and play from the controls window as usual.
 
+From the single-window page `/`, the **Two screens** button does the first step for you: it opens the display in
+its own window and turns the current window into the controls. Any input you had connected there has to be
+connected again.
+
 The display does all the time-critical work: audio capture, analysis, track recognition and drawing. The controls
 window sends it commands and shows what it reports back, about ten times a second and straight away when
 something changes. You can cover or minimize the controls window and the visuals keep reacting.

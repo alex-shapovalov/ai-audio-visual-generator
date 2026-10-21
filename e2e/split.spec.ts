@@ -93,6 +93,19 @@ test("the controls can open the display window themselves", async ({ page, conte
   await expect(page.getByText("Display connected", { exact: true })).toBeVisible()
 })
 
+test("the main page can split into a display window and controls in one click", async ({ page, context }) => {
+  const deck = new DeckPage(page)
+  await deck.open()
+
+  const opened = context.waitForEvent("page")
+  await page.getByRole("button", { name: "Two screens" }).click()
+  const display = await opened
+
+  await expect(display).toHaveURL(/\/display$/)
+  await expect(page).toHaveURL(/\/controls$/)
+  await expect(page.getByText("Display connected", { exact: true })).toBeVisible()
+})
+
 test("the display is only the picture", async ({ page, context, consoleProblems }) => {
   await openControls(page)
   const display = await openDisplay(context, consoleProblems)

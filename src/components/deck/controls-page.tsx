@@ -8,10 +8,6 @@ import { useShortcuts } from "@/components/deck/use-shortcuts"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
-const DISPLAY_URL = "/display"
-const DISPLAY_WINDOW = "afterimage-display"
-const DISPLAY_FEATURES = "popup,width=1280,height=720"
-
 const STATUS = {
   connected: { variant: "default", label: "Display connected" },
   waiting: { variant: "secondary", label: "No display" },
@@ -26,7 +22,8 @@ export function ControlsPage() {
   useShortcuts({ onScene: deck.control.selectScene, onToggleAuto: deck.toggleAuto })
 
   const openDisplay = () => {
-    setBlocked(window.open(DISPLAY_URL, DISPLAY_WINDOW, DISPLAY_FEATURES) === null)
+    const display = window.open("/display", "afterimage-display", "popup,width=1280,height=720")
+    setBlocked(display === null)
   }
 
   return (
@@ -51,7 +48,7 @@ export function ControlsPage() {
       )}
       {connected || !blocked ? null : (
         <Notice tone="error">
-          Your browser blocked the popup. Allow popups for this site, or open {DISPLAY_URL} in a new window yourself.
+          Your browser blocked the popup. Allow popups for this site, or open /display in a new window yourself.
         </Notice>
       )}
       {audioLocked ? <Notice tone="info">Click the display window once so it is allowed to use audio.</Notice> : null}
