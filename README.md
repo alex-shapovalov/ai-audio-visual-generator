@@ -4,7 +4,7 @@ A listen-only, audio-reactive visual deck for DJs playing EDM, tech house, dubst
 to an input device, drives fullscreen WebGL2 visuals from the music, recognizes tracks you enrolled, and
 switches to each track's saved look.
 
-Made by Alex Shapovalov, of [page.dwn](https://pgdn.music). Come see what else we make.
+Made by Alex Shapovalov, of [page.dwn](https://pgdn.music). We'd love if you checked out our music!
 
 - Listen-only. Inputs are never played back. Echo cancellation, noise suppression and auto gain are turned off
   so the analysis sees the raw signal.
