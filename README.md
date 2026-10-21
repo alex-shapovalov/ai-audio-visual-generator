@@ -22,13 +22,14 @@ WebAssembly is committed.
 ```bash
 pnpm install
 cp .env.example .env.local
-pnpm dev -p 4617 -H 127.0.0.1
+pnpm dev
 ```
 
 Open http://127.0.0.1:4617 and press **Run built-in demo** to see it move without any hardware.
 
-`-H 127.0.0.1` keeps the dev server off your network. `/api/look` spends your OpenRouter key for any caller
-that can reach it, and it has no authentication or rate limit, so do not expose it publicly as it is.
+`pnpm dev` listens on 127.0.0.1 only, which keeps the dev server off your network. `/api/look` spends your
+OpenRouter key for any caller that can reach it, and it has no authentication or rate limit, so do not expose it
+publicly as it is.
 
 Audio input needs a secure context. `localhost` and `127.0.0.1` count as secure.
 
