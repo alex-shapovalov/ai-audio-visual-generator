@@ -8,12 +8,13 @@ import { SafetySection } from "@/components/deck/safety-section"
 import { SourceSection } from "@/components/deck/source-section"
 import type { Deck } from "@/components/deck/use-deck"
 import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
 
-type LiveTabProps = { deck: Deck }
+type LiveTabProps = { deck: Deck; enabled?: boolean }
 
-export function LiveTab({ deck }: LiveTabProps) {
+export function LiveTab({ deck, enabled = true }: LiveTabProps) {
   return (
-    <div className="flex flex-col">
+    <div inert={!enabled} className={cn("flex flex-col", !enabled && "opacity-50")}>
       <SourceSection deck={deck} />
       <Separator />
       <MetersSection meters={deck.meters} />

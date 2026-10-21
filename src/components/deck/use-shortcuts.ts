@@ -7,8 +7,8 @@ import type { SceneId } from "@/lib/types"
 type Handlers = {
   onScene: (scene: SceneId) => void
   onToggleAuto: () => void
-  onTogglePanel: () => void
-  onFullscreen: () => void
+  onTogglePanel?: () => void
+  onFullscreen?: () => void
 }
 
 export const useShortcuts = ({ onScene, onToggleAuto, onTogglePanel, onFullscreen }: Handlers) => {
@@ -23,9 +23,9 @@ export const useShortcuts = ({ onScene, onToggleAuto, onTogglePanel, onFullscree
       case "a":
         return onToggleAuto()
       case "h":
-        return onTogglePanel()
+        return onTogglePanel?.()
       case "f":
-        return onFullscreen()
+        return onFullscreen?.()
     }
   })
 

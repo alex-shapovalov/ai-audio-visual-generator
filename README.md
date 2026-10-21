@@ -13,6 +13,8 @@ switches to each track's saved look.
 - An optional AI director (OpenRouter) suggests looks from a vibe prompt or a track's stats. A local keyword
   heuristic is used when there is no key or the request fails.
 - Manual control always wins. Touching the look pauses auto cues until you resume them.
+- Two-screen mode: a display window that shows nothing but the picture, and a separate controls window for your
+  laptop screen.
 
 ## Quick start
 
@@ -33,10 +35,43 @@ publicly as it is.
 
 Audio input needs a secure context. `localhost` and `127.0.0.1` count as secure.
 
+There are three pages:
+
+| Address | What it is |
+|---|---|
+| `/` | Everything in one window: the visuals with the control panel on top. Good for a single screen |
+| `/display` | Only the picture, for the projector or second monitor |
+| `/controls` | The control panel on its own page, for your laptop screen |
+
+## Two screens: a display and a controls window
+
+1. Open http://127.0.0.1:4617/controls and press **Open display window**. The display opens as a separate window.
+2. Drag it to the projector or second monitor and click it once. The click allows audio and goes fullscreen.
+   `F` toggles fullscreen again.
+3. Connect your input and play from the controls window as usual.
+
+The display does all the time-critical work: audio capture, analysis, track recognition and drawing. The controls
+window sends it commands and shows what it reports back, about ten times a second and straight away when
+something changes. You can cover or minimize the controls window and the visuals keep reacting.
+
+Things to know:
+
+- Both windows must be in the same browser profile and at the same address. They talk through the browser
+  (`BroadcastChannel`) and share media and enrolled tracks through its storage. Nothing leaves your machine.
+- Keep the display window uncovered. A browser can pause animation in a window that is fully covered or minimized.
+- Keys `1`-`9`, `0` and `A` work in either window. `F` works in the display.
+- The strobe master lives in the display and is off every time the display loads.
+- With no display open, the Live tab is greyed out. Media and Tracks still work, and what you add there is
+  picked up by the display when it opens.
+- If the controls ask the display to listen before anyone has clicked the display, they say so and ask for the
+  click. The display refuses audio until it has had one.
+- Open only one display window. Nothing stops a second one, and both would answer the controls.
+
 ## Using the deck
 
-The panel has three tabs. Keys: `1`-`9` and `0` pick a scene, `A` toggles auto cues, `H` hides the panel, `F`
-toggles fullscreen. Keys are ignored while you type in a field.
+The panel has three tabs, in `/` and in `/controls`. Keys: `1`-`9` and `0` pick a scene, `A` toggles auto cues,
+`H` hides the panel in `/`, and `F` toggles fullscreen in `/` and `/display`. Keys are ignored while you type in
+a field.
 
 | Key | Scene | What it looks like |
 |---|---|---|
@@ -101,7 +136,7 @@ input device -> AudioWorklet (capture) -> Downsampler (wasm, 11025 Hz) -> matche
 | FFT, windowing, downsampling, fingerprinting, matcher, band levels, beat and section tracking, simulator, demo-track synthesis, WAV encoding | Rust | `crates/deck-dsp` |
 | Offline tools (`demo-tracks`, `fingerprint`) | Rust | `crates/deck-cli` |
 | Audio graph, decoding, matcher worker, IndexedDB, WebGL2 renderer, GLSL | TypeScript, GLSL | `src/audio`, `src/visuals`, `src/lib` |
-| UI and the look route | TypeScript, React | `src/components`, `src/app` |
+| UI, the two window roles and the look route | TypeScript, React | `src/components`, `src/remote`, `src/app` |
 
 Fingerprinting and matching are the heavy parts. The per-frame band, beat and section code is in Rust as well,
 so the browser and the native tests run a single implementation. It is not there for speed.
@@ -150,7 +185,7 @@ stale wasm in this checkout's build. Run `cargo clean` before rebuilding if you 
 |---|---|---|
 | Rust | `cargo test --workspace` | DSP, matcher, beat guard, CLI, and `parity.rs`, which pins values captured from the original TypeScript implementation |
 | Vitest | `pnpm test` | The wasm boundary, matcher worker protocol, IndexedDB, look schema and heuristic, `/api/look`, renderer look state |
-| Playwright | `pnpm test:e2e` | The deck in Chromium: scenes, media, enrollment, recognition, manual override, describe a look, mobile layout, strobe rate |
+| Playwright | `pnpm test:e2e` | The deck in Chromium: scenes, media, enrollment, recognition, manual override, describe a look, mobile layout, strobe rate, and the display and controls windows working together |
 
 Notes:
 
@@ -187,6 +222,9 @@ within 240 ms, so they stay at about four per second or less. Warn your audience
   averages the channels it receives.
 - The app runs in a browser. It has been tested in Chromium on Apple silicon only. Safari and Firefox are not
   tested.
+- The two-window mode was tested with Chromium's fake audio device and windows on one machine. Whether a real
+  browser asks for microphone permission a second time in the display window, and how it behaves across two
+  physical monitors, has not been checked.
 - `/api/look` has no authentication or rate limiting. Run it on localhost or add both before deploying.
 
 ## Status

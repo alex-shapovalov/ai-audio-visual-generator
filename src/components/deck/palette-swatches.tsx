@@ -11,7 +11,7 @@ type PaletteSwatchesProps = { colors: Colors; onChange: (colors: Colors) => void
 
 export function PaletteSwatches({ colors, onChange }: PaletteSwatchesProps) {
   return (
-    <div role="group" aria-label="Palette" className="flex flex-wrap gap-2">
+    <div role="group" aria-label="Palette" className="grid grid-cols-6 gap-2">
       {PALETTES.map((palette) => {
         const selected = sameColors(colors, palette.colors)
         const [bright, secondary, dark] = palette.colors
@@ -24,7 +24,7 @@ export function PaletteSwatches({ colors, onChange }: PaletteSwatchesProps) {
             aria-pressed={selected}
             onClick={() => onChange(palette.colors)}
             className={cn(
-              "h-8 w-12 rounded-md border border-border transition-shadow outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+              "h-8 w-full rounded-md border border-border transition-shadow outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
               selected && "ring-2 ring-foreground",
             )}
             style={{

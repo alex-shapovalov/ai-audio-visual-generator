@@ -1,11 +1,8 @@
 "use client"
 
-import { LiveTab } from "@/components/deck/live-tab"
-import { MediaTab } from "@/components/deck/media-tab"
-import { TracksTab } from "@/components/deck/tracks-tab"
+import { ControlTabs } from "@/components/deck/control-tabs"
 import type { Deck } from "@/components/deck/use-deck"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
 type ControlPanelProps = { deck: Deck; onHide: () => void }
@@ -29,24 +26,9 @@ export function ControlPanel({ deck, onHide }: ControlPanelProps) {
           Hide
         </Button>
       </header>
-      <Tabs defaultValue="live" className="min-h-0 flex-1 gap-0 px-4 pb-4">
-        <TabsList className="w-full">
-          <TabsTrigger value="live">Live</TabsTrigger>
-          <TabsTrigger value="media">Media</TabsTrigger>
-          <TabsTrigger value="tracks">Tracks</TabsTrigger>
-        </TabsList>
-        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-          <TabsContent value="live">
-            <LiveTab deck={deck} />
-          </TabsContent>
-          <TabsContent value="media">
-            <MediaTab deck={deck} />
-          </TabsContent>
-          <TabsContent value="tracks">
-            <TracksTab deck={deck} />
-          </TabsContent>
-        </div>
-      </Tabs>
+      <div className="flex min-h-0 flex-1 flex-col px-4 pb-4">
+        <ControlTabs deck={deck} />
+      </div>
     </aside>
   )
 }
