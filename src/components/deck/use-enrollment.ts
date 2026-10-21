@@ -70,7 +70,7 @@ export const useEnrollment = ({ runtime, library, suggest }: Options) => {
         stats: cue.stats,
         media: library.media.map((item) => ({ id: item.id, name: item.name })),
       })
-      await library.updateCue({ ...cue, look: response.look })
+      await library.updateCue(cue.id, (current) => ({ ...current, look: response.look }))
       update(id, { stage: "done", message: summarize(response) })
     } catch (cause) {
       update(id, { stage: "failed", message: errorMessage(cause, "This file could not be enrolled") })

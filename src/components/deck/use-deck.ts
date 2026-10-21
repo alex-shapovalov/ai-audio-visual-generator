@@ -68,7 +68,7 @@ export const useDeck = (canvasRef: RefObject<HTMLCanvasElement | null>) => {
     try {
       const media = library.media.map((item) => ({ id: item.id, name: item.name }))
       const response = await suggest({ title: cue.title, stats: cue.stats, media })
-      await library.updateCue({ ...cue, look: response.look })
+      await library.updateCue(cue.id, (current) => ({ ...current, look: response.look }))
       setSuggestions((current) => ({ ...current, [cue.id]: response }))
     } finally {
       setSuggestingFor(null)

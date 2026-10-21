@@ -10,7 +10,8 @@
     "test": "vitest run",
     "typecheck": "next typegen && tsc --noEmit",
     "build:wasm": "wasm-pack build crates/deck-dsp --target web --release --no-pack --out-dir ../../src/wasm --out-name deck_dsp && rm -f src/wasm/.gitignore && mkdir -p public/wasm && cp src/wasm/deck_dsp_bg.wasm public/wasm/",
-    "demo:audio": "cargo run --release -p deck-cli -- demo-tracks --out demo-audio"
+    "demo:audio": "cargo run --release -p deck-cli -- demo-tracks --out demo-audio",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

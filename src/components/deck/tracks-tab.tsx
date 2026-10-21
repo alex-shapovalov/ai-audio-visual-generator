@@ -30,7 +30,9 @@ function TrackList({ deck }: TracksTabProps) {
             match={isMatch ? matching.status : null}
             suggestion={deck.suggestions[cue.id]}
             suggesting={deck.suggestingFor === cue.id}
-            onLookChange={(look) => library.updateCue({ ...cue, look })}
+            onLookChange={(change) =>
+              library.updateCue(cue.id, (current) => ({ ...current, look: change(current.look) }))
+            }
             onPreview={() => deck.previewLook(cue.look)}
             onSuggest={() => deck.suggestForCue(cue)}
             onDelete={() => library.removeCue(cue.id)}

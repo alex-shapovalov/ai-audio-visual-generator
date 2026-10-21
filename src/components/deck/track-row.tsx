@@ -20,7 +20,7 @@ type TrackRowProps = {
   match: MatchStatus | null
   suggestion: LookResponse | undefined
   suggesting: boolean
-  onLookChange: (look: Look) => void
+  onLookChange: (change: (look: Look) => Look) => void
   onPreview: () => void
   onSuggest: () => void
   onDelete: () => void
@@ -57,10 +57,10 @@ export function TrackRow({
         {match ? <Badge data-testid="live-score">Score {match.score}</Badge> : null}
       </header>
 
-      <SceneButtons value={cue.look.scene} onChange={(scene) => onLookChange(withScene(cue.look, scene, mediaIds))} />
-      <PaletteSwatches colors={cue.look.colors} onChange={(colors) => onLookChange({ ...cue.look, colors })} />
-      <MediaSelect media={media} value={cue.look.mediaId} onChange={(id) => onLookChange(withMedia(cue.look, id))} />
-      <LabeledSwitch label="Strobe" checked={cue.look.strobe} onChange={(strobe) => onLookChange({ ...cue.look, strobe })} />
+      <SceneButtons value={cue.look.scene} onChange={(scene) => onLookChange((look) => withScene(look, scene, mediaIds))} />
+      <PaletteSwatches colors={cue.look.colors} onChange={(colors) => onLookChange((look) => ({ ...look, colors }))} />
+      <MediaSelect media={media} value={cue.look.mediaId} onChange={(id) => onLookChange((look) => withMedia(look, id))} />
+      <LabeledSwitch label="Strobe" checked={cue.look.strobe} onChange={(strobe) => onLookChange((look) => ({ ...look, strobe }))} />
 
       <div className="flex flex-wrap gap-2">
         <Button type="button" size="sm" onClick={onPreview}>

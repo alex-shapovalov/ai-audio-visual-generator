@@ -26,6 +26,7 @@ export function SceneButtons({ value, onChange, showKeys = false }: SceneButtons
           type="button"
           size="sm"
           variant={scene === value ? "default" : "outline"}
+          aria-label={LABELS[scene]}
           aria-pressed={scene === value}
           aria-keyshortcuts={String(index + 1)}
           onClick={() => onChange(scene)}

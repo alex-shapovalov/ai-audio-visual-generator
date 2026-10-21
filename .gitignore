@@ -50,3 +50,10 @@ next-env.d.ts
 
 # example env stays tracked
 !.env.example
+
+# local scratch space for reference/parity tooling
+/.scratch/
+
+# playwright output
+/test-results/
+/playwright-report/

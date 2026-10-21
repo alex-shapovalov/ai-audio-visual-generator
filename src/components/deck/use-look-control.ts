@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useEffectEvent, useState } from "react"
+import { useEffect, useEffectEvent, useRef, useState } from "react"
 import type { Runtime } from "@/components/deck/use-runtime"
 import { withMedia, withScene, withoutMedia } from "@/lib/look-edit"
 import { sanitizeLook } from "@/lib/look-schema"
@@ -14,9 +14,10 @@ export const useLookControl = (runtime: Runtime | null, media: readonly MediaIte
   const [auto, setAuto] = useState(true)
   const [strobeEnabled, setStrobeEnabled] = useState(false)
   const [activeCueId, setActiveCueId] = useState<string | null>(null)
+  const latest = useRef<Look>(DEFAULT_LOOK)
   const mediaIds = media.map((item) => item.id)
 
-  const pushInitialLook = useEffectEvent(() => runtime?.renderer.setLook(look, true))
+  const pushInitialLook = useEffectEvent(() => runtime?.renderer.setLook(latest.current, true))
   useEffect(() => {
     pushInitialLook()
   }, [runtime])
@@ -26,13 +27,14 @@ export const useLookControl = (runtime: Runtime | null, media: readonly MediaIte
   }, [runtime, strobeEnabled])
 
   const commit = (next: Look, immediate: boolean) => {
+    latest.current = next
     setLook(next)
     runtime?.renderer.setLook(next, immediate)
   }
 
-  const editManually = (next: Look) => {
+  const editManually = (change: (current: Look) => Look) => {
     setAuto(false)
-    commit(next, false)
+    commit(change(latest.current), false)
   }
 
   return {
@@ -43,9 +45,9 @@ export const useLookControl = (runtime: Runtime | null, media: readonly MediaIte
     setAuto,
     setStrobeEnabled,
     clearActiveCue: () => setActiveCueId(null),
-    selectScene: (scene: SceneId) => editManually(withScene(look, scene, mediaIds)),
-    patchLook: (patch: Partial<Look>) => editManually({ ...look, ...patch }),
-    chooseMedia: (mediaId: string | null) => editManually(withMedia(look, mediaId)),
+    selectScene: (scene: SceneId) => editManually((current) => withScene(current, scene, mediaIds)),
+    patchLook: (patch: Partial<Look>) => editManually((current) => ({ ...current, ...patch })),
+    chooseMedia: (mediaId: string | null) => editManually((current) => withMedia(current, mediaId)),
     showLook: (next: Look, immediate: boolean) => {
       setAuto(false)
       commit(sanitizeLook(next, mediaIds, next), immediate)
@@ -55,8 +57,8 @@ export const useLookControl = (runtime: Runtime | null, media: readonly MediaIte
       commit(sanitizeLook(cue.look, mediaIds, cue.look), false)
     },
     forgetMedia: (removedId: string) => {
-      const next = withoutMedia(look, removedId)
-      if (next !== look) commit(next, true)
+      const next = withoutMedia(latest.current, removedId)
+      if (next !== latest.current) commit(next, true)
     },
   }
 }
