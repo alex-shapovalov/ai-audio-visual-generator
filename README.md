@@ -170,6 +170,9 @@ within 240 ms, so they stay at about four per second or less. Warn your audience
 - The beat tracker keeps a history of 60 frames, so its window depends on the display refresh rate.
 - The matcher receives the whole library again whenever the set of enrolled tracks changes.
 - Audio is mixed to mono. Tracks longer than one hour cannot be enrolled.
+- Chromium on macOS exposed only the first two of an Audient EVO4's four input channels, even when four were
+  requested. The other two, probably its loopback pair, cannot be captured from the browser. The capture path
+  averages the channels it receives.
 - The app runs in a browser. It has been tested in Chromium on Apple silicon only. Safari and Firefox are not
   tested.
 - `/api/look` has no authentication or rate limiting. Run it on localhost or add both before deploying.
