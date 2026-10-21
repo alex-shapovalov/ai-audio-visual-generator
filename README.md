@@ -1,20 +1,32 @@
 # Afterimage
 
-A listen-only, audio-reactive visual deck for DJs playing EDM, tech house, dubstep and trance. It listens to an audio input, drives fullscreen GPU visuals from the music, and recognizes tracks you have enrolled so each one can have its own look.
+A listen-only, audio-reactive visual deck for DJs playing EDM, tech house, dubstep and trance.
+It listens to an input device, drives fullscreen GPU visuals from the music, recognizes tracks you
+enrolled, and switches to each track's saved look.
 
-Status: bootstrapping. See the milestone commits for progress.
+Work in progress. This README is a stub that is extended as the milestones land.
 
-## Requirements
+## Quick start
 
-- Node.js 22+
-- Rust (stable) with the `wasm32-unknown-unknown` target and `wasm-pack`, only needed to rebuild the WebAssembly module
-
-## Setup
+This project uses [pnpm](https://pnpm.io).
 
 ```bash
-npm install
+pnpm install
 cp .env.example .env.local
-npm run dev
+pnpm dev -p 4617 -H 127.0.0.1
 ```
 
-Set `OPENROUTER_API_KEY` in `.env.local` to enable the AI director. `.env.local` is gitignored; never commit a key.
+Open http://127.0.0.1:4617.
+
+`-H 127.0.0.1` keeps the dev server off your network. `/api/look` spends your OpenRouter key for any
+caller that can reach it.
+
+## Secrets
+
+The OpenRouter key goes in `.env.local` (gitignored) or in the in-app Settings field (stored in
+`localStorage`). Never commit a key. `.env.example` lists the variables.
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `OPENROUTER_API_KEY` | Key used by `/api/look` | none (local heuristic is used) |
+| `OPENROUTER_MODEL` | Model used by `/api/look` | `openai/gpt-4o-mini` |
