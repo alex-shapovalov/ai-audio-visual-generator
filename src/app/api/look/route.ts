@@ -1,9 +1,9 @@
 import { heuristicLook } from "@/lib/look-heuristic"
 import { sanitizeLook, type LookRequest, type LookResponse, type MediaRef } from "@/lib/look-schema"
+import { DEFAULT_MODEL, KEY_HEADER } from "@/lib/openrouter"
 import type { TrackStats } from "@/lib/types"
 
 const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
-const DEFAULT_MODEL = "openai/gpt-4o-mini"
 const TIMEOUT_MS = 25000
 
 const SYSTEM_PROMPT = `You are the lighting and visuals director for a live electronic music set (EDM, tech house, dubstep, trance).
@@ -105,7 +105,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid request body" }, { status: 400 })
   }
 
-  const key = request.headers.get("x-openrouter-key") || process.env.OPENROUTER_API_KEY
+  const key = request.headers.get(KEY_HEADER) || process.env.OPENROUTER_API_KEY
   const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL
 
   if (!key) {

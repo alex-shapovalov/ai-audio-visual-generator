@@ -16,6 +16,9 @@ const RAW_AUDIO = {
 export type AudioInput = { deviceId: string; label: string }
 
 export const requestInputs = async (): Promise<AudioInput[]> => {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    throw new DOMException("Audio capture needs a secure page", "SecurityError")
+  }
   const probe = await navigator.mediaDevices.getUserMedia({ audio: RAW_AUDIO })
   probe.getTracks().forEach((track) => track.stop())
   const devices = await navigator.mediaDevices.enumerateDevices()
