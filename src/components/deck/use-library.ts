@@ -18,7 +18,7 @@ export type UploadReport = { name: string; error?: string; warning?: string }
 
 export type Library = ReturnType<typeof useLibrary>
 
-export const useLibrary = () => {
+export const useLibrary = (onChange?: () => void) => {
   const [media, setMedia] = useState<MediaItem[]>([])
   const [cues, setCues] = useState<CueRecord[]>([])
   const [loaded, setLoaded] = useState(false)
@@ -64,11 +64,22 @@ export const useLibrary = () => {
     }
   }
 
+  const reload = async () => {
+    await writes.current
+    await resync()
+  }
+
   const persist = (work: () => Promise<void>, failure: string) => {
-    const task = writes.current.then(work).then(publish, async (cause: unknown) => {
-      setError(errorMessage(cause, failure))
-      await resync()
-    })
+    const task = writes.current.then(work).then(
+      () => {
+        publish()
+        onChange?.()
+      },
+      async (cause: unknown) => {
+        setError(errorMessage(cause, failure))
+        await resync()
+      },
+    )
     writes.current = task
     return task
   }
@@ -90,6 +101,7 @@ export const useLibrary = () => {
     }
     intendedMedia.current = [item, ...intendedMedia.current]
     publish()
+    onChange?.()
     return { name: file.name, warning: isLargeMedia(kind, file.size) ? LARGE_FILE_WARNING : undefined }
   }
 
@@ -141,6 +153,7 @@ export const useLibrary = () => {
     loaded,
     error,
     uploading: pendingUploads > 0,
+    reload,
     clearError: () => setError(null),
     addMedia,
     renameMedia,

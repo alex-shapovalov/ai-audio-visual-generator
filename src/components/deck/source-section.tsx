@@ -11,8 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 type SourceSectionProps = { deck: Deck }
 
 export function SourceSection({ deck }: SourceSectionProps) {
-  const { source, runtime } = deck
-  const ready = runtime !== null && !source.busy
+  const { source } = deck
+  const ready = deck.ready && !source.busy
   const items = source.inputs.map((input) => ({ value: input.deviceId, label: input.label }))
   const playFirstFile = (files: File[]) => source.playFile(files[0])
 

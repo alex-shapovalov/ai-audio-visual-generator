@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react"
 import { decodeForMatching } from "@/audio/decode"
+import type { MatcherClient } from "@/audio/matcher-client"
 import type { Library } from "@/components/deck/use-library"
-import type { Runtime } from "@/components/deck/use-runtime"
 import { newId } from "@/lib/db"
 import { errorMessage } from "@/lib/error-message"
 import { titleFromFileName } from "@/lib/format"
@@ -23,8 +23,10 @@ export type EnrollJob = {
   message: string | null
 }
 
+export type Fingerprinter = Pick<MatcherClient, "enroll">
+
 type Options = {
-  runtime: Runtime | null
+  fingerprinter: Fingerprinter | null
   library: Pick<Library, "media" | "addCue" | "updateCue">
   suggest: (request: LookRequest) => Promise<LookResponse>
 }
@@ -35,7 +37,9 @@ const summarize = (response: LookResponse) => {
   return `Look chosen locally${reason}`
 }
 
-export const useEnrollment = ({ runtime, library, suggest }: Options) => {
+export type Enrollment = ReturnType<typeof useEnrollment>
+
+export const useEnrollment = ({ fingerprinter, library, suggest }: Options) => {
   const [jobs, setJobs] = useState<EnrollJob[]>([])
   const nextId = useRef(1)
 
@@ -43,12 +47,12 @@ export const useEnrollment = ({ runtime, library, suggest }: Options) => {
     setJobs((current) => current.map((job) => (job.id === id ? { ...job, ...patch } : job)))
 
   const enrollOne = async (file: File, id: number) => {
-    if (!runtime) return
+    if (!fingerprinter) return
     try {
       update(id, { stage: "decoding" })
       const samples = await decodeForMatching(file)
       update(id, { stage: "fingerprinting" })
-      const print = await runtime.matcher.enroll(samples)
+      const print = await fingerprinter.enroll(samples)
       if (print.hashes.length < MIN_HASHES) {
         update(id, { stage: "failed", message: NOT_DISTINCTIVE })
         return

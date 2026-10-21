@@ -54,7 +54,7 @@ export function TracksTab({ deck }: TracksTabProps) {
           accept="audio/*"
           label="Audio files to enroll"
           multiple
-          disabled={deck.runtime === null}
+          disabled={!deck.canEnroll}
           onFiles={enrollment.enroll}
         >
           Choose tracks
