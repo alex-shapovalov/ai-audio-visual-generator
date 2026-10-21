@@ -25,7 +25,7 @@ function StartupError({ message }: { message: string }) {
         <h2 className="text-lg font-semibold">The visuals could not start</h2>
         <p className="text-sm text-muted-foreground">{message}</p>
         <p className="text-xs text-muted-foreground">
-          Afterimage needs a browser with WebGL2 and WebAssembly, such as a current Chrome, Edge or Safari.
+          Afterimage needs a browser with WebGL2 and WebAssembly. It has only been tested in Chromium.
         </p>
       </div>
     </div>
