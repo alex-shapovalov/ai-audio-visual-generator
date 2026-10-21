@@ -1,7 +1,7 @@
 import path from "node:path"
 import { defineConfig } from "@playwright/test"
 
-const PORT = 4617
+const PORT = 4627
 const ORIGIN = `http://127.0.0.1:${PORT}`
 const FAKE_MICROPHONE = path.join(process.cwd(), "demo-audio", "demo-dubstep-140.wav")
 
@@ -28,7 +28,7 @@ export default defineConfig({
   webServer: {
     command: `pnpm build && pnpm start -p ${PORT} -H 127.0.0.1`,
     url: ORIGIN,
-    reuseExistingServer: true,
+    reuseExistingServer: false,
     timeout: 240_000,
     env: { OPENROUTER_API_KEY: "" },
   },
