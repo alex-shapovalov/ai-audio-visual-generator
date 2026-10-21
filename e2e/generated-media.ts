@@ -99,3 +99,55 @@ export const pixelsAt = async (page: Page, points: { x: number; y: number }[]): 
     { base64: screenshot.toString("base64"), spots: points },
   )
 }
+
+export const pulseTrainWav = (seconds: number, periodMs: number, sampleRate = 44100): Buffer => {
+  const samples = Math.floor(seconds * sampleRate)
+  const bytes = silentWav(seconds, sampleRate)
+  const periodSamples = Math.floor((periodMs / 1000) * sampleRate)
+  for (let index = 0; index < samples; index++) {
+    const seconds_in_pulse = (index % periodSamples) / sampleRate
+    const level = Math.sin(2 * Math.PI * 55 * seconds_in_pulse) * Math.exp(-seconds_in_pulse / 0.025) * 0.9
+    bytes.writeInt16LE(Math.round(level * 32767), 44 + index * 2)
+  }
+  return bytes
+}
+
+export type BrightnessSample = { at: number; level: number }
+
+type SamplerWindow = Window & {
+  __brightness?: { samples: BrightnessSample[]; stop: () => void }
+}
+
+export const startBrightnessSampler = (page: Page) =>
+  page.evaluate(() => {
+    const source = document.querySelector("canvas[aria-label='Visuals']")
+    if (!(source instanceof HTMLCanvasElement)) throw new Error("The visuals canvas was not found")
+    const probe = document.createElement("canvas")
+    probe.width = 16
+    probe.height = 9
+    const context = probe.getContext("2d", { willReadFrequently: true })
+    if (!context) throw new Error("2d canvas is unavailable")
+    const samples: BrightnessSample[] = []
+    let running = true
+    const sample = (now: number) => {
+      if (!running) return
+      context.drawImage(source, 0, 0, 16, 9)
+      const { data } = context.getImageData(0, 0, 16, 9)
+      let total = 0
+      for (let index = 0; index < data.length; index += 4) {
+        total += (data[index] + data[index + 1] + data[index + 2]) / 3
+      }
+      samples.push({ at: now, level: total / (data.length / 4) })
+      requestAnimationFrame(sample)
+    }
+    requestAnimationFrame(sample)
+    ;(window as SamplerWindow).__brightness = { samples, stop: () => (running = false) }
+  })
+
+export const stopBrightnessSampler = (page: Page): Promise<BrightnessSample[]> =>
+  page.evaluate(() => {
+    const sampler = (window as SamplerWindow).__brightness
+    if (!sampler) throw new Error("The brightness sampler was not started")
+    sampler.stop()
+    return sampler.samples
+  })
