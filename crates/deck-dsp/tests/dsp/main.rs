@@ -1,0 +1,9 @@
+mod analysis;
+mod common;
+mod downsample;
+mod fft;
+mod fingerprint;
+mod matcher;
+mod parity;
+mod synth;
+mod wav;
