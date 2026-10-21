@@ -103,8 +103,12 @@ How it is protected:
 - The link is plain HTTP. Anyone who can read traffic on your network can read the token. Use a network you
   trust, and stop `pnpm remote` when you do not need it.
 
-Ports are `AFTERIMAGE_RELAY_PORT` (4618) and `AFTERIMAGE_NEXT_PORT` (4617). `pnpm relay` starts only the relay,
-for when the app is already running.
+Ports are `AFTERIMAGE_RELAY_PORT` (4618) and `AFTERIMAGE_NEXT_PORT` (4617).
+
+`pnpm relay` starts only the relay, for an app that is already running. The display only looks for a relay when
+the app was started with `AFTERIMAGE_RELAY_PORT` set, for example `AFTERIMAGE_RELAY_PORT=4618 pnpm dev`. I checked
+that the relay can serve a dev server's remote page. I have not run the whole phone flow against `pnpm dev`, so
+use `pnpm remote` for a real set.
 
 ## Using the deck
 
