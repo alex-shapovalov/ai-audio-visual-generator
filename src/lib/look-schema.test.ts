@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { sanitizeLook } from "@/lib/look-schema"
 import { DEFAULT_LOOK } from "@/lib/palettes"
+import { SCENES } from "@/lib/types"
 
 const VALID_COLORS = ["#112233", "#abc", "#FFEEDD"]
 
@@ -31,6 +32,10 @@ describe("sanitizeLook", () => {
 
   it.each([undefined, null, "portal", 42, []])("returns the fallback look for %j", (raw) => {
     expect(sanitizeLook(raw, [])).toEqual({ ...DEFAULT_LOOK, strobe: false, kaleido: false })
+  })
+
+  it.each(SCENES.filter((scene) => scene !== "media"))("accepts the %s scene", (scene) => {
+    expect(sanitizeLook({ scene }, []).scene).toBe(scene)
   })
 
   it("falls back on an unknown scene", () => {

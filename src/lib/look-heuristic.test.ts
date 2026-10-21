@@ -48,6 +48,31 @@ describe("heuristicLook genres", () => {
   })
 })
 
+describe("heuristicLook newer scenes", () => {
+  it.each([
+    ["live equalizer spectrum", "bars", "synthwave"],
+    ["ambient chill set", "aurora", "abyss"],
+    ["hyperspace through the stars", "warp", "ice"],
+    ["festival laser show", "lasers", "synthwave"],
+    ["psychedelic mandala", "bloom", "royal"],
+  ])("maps %j to the %s scene without strobe", (prompt, scene, paletteId) => {
+    const look = ask({ prompt })
+    expect(look.scene).toBe(scene)
+    expect(look.colors).toEqual(palette(paletteId))
+    expect(look.strobe).toBe(false)
+  })
+
+  it("keeps the established genres ahead of the newer words", () => {
+    expect(ask({ prompt: "dubstep in space" }).scene).toBe("rift")
+    expect(ask({ prompt: "trance with lasers" }).scene).toBe("portal")
+    expect(ask({ prompt: "chill house" }).scene).toBe("grid")
+  })
+
+  it.each(["sunbars", "mystars", "psycho", "predmaker"])("matches the short words only as whole words: %j", (prompt) => {
+    expect(ask({ prompt }).scene).toBe("portal")
+  })
+})
+
 describe("heuristicLook track stats", () => {
   it("chooses rift for very bass-heavy tracks with no genre words", () => {
     const look = ask({ title: "untitled", stats: { duration: 200, bass: 0.8, brightness: 0.01 } })
@@ -81,6 +106,13 @@ describe("heuristicLook colors", () => {
     ["icy blue", "trance"],
     ["warm amber", "house"],
     ["black and white", "mono"],
+    ["sunset vibes", "sunset"],
+    ["arctic frost", "ice"],
+    ["toxic waste", "toxic"],
+    ["royal court", "royal"],
+    ["crimson tide", "crimson"],
+    ["retro synthwave", "synthwave"],
+    ["underwater glow", "abyss"],
   ])("maps %j to the %s palette", (prompt, id) => {
     expect(ask({ prompt }).colors).toEqual(palette(id))
   })

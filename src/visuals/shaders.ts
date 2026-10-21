@@ -13,6 +13,11 @@ export const SCENE_INDEX: Record<SceneId, number> = {
   strobe: 2,
   rift: 3,
   media: 4,
+  bars: 5,
+  aurora: 6,
+  warp: 7,
+  lasers: 8,
+  bloom: 9,
 }
 
 export const FRAGMENT = `#version 300 es
@@ -118,6 +123,126 @@ vec3 rift(vec2 p) {
   return col;
 }
 
+float spectrum(float t) {
+  float levels[4] = float[4](uAudio.x, uAudio.y, uAudio.z, uAudio.w);
+  float x = clamp(t, 0.0, 1.0) * 3.0;
+  int i = int(min(floor(x), 2.0));
+  return mix(levels[i], levels[i + 1], smoothstep(0.0, 1.0, x - float(i)));
+}
+
+vec3 bars(vec2 p) {
+  float kick = uPulse.x;
+  float aspect = uRes.x / uRes.y;
+  float u = p.x / aspect + 0.5 + sin(p.y * 7.0 + uTravel) * uWarp * uAudio.x * 0.015;
+  float columns = 40.0;
+  float cell = floor(u * columns);
+  float local = fract(u * columns);
+  float t = abs((cell + 0.5) / columns - 0.5) * 2.0;
+  float flutter = 0.7 + 0.3 * sin(uTime * (2.0 + hash(cell) * 4.0) + cell * 1.7);
+  float height = 0.04 + spectrum(t) * 0.38 * flutter + kick * 0.05;
+  float d = abs(p.y);
+  float body = smoothstep(height, height - 0.012, d);
+  float gap = smoothstep(0.0, 0.14, local) * smoothstep(1.0, 0.86, local);
+  vec3 tint = mix(uA, uB, clamp(d / max(height, 0.001), 0.0, 1.0));
+
+  vec3 col = uC * 0.5;
+  col += tint * body * gap * (0.7 + kick * 0.5 + uPulse.z * 0.3);
+  col += uB * exp(-max(d - height, 0.0) * 18.0) * gap * 0.22 * (0.4 + kick);
+  col += uA * exp(-d * 30.0) * 0.12;
+  return col;
+}
+
+vec3 aurora(vec2 p) {
+  float kick = uPulse.x;
+  float open = uPulse.y;
+  float t = uTravel * 0.18;
+  float sway = 0.2 + uWarp * uAudio.x * 0.3;
+  float glow = 0.55 + uAudio.z * 0.6 + kick * 0.35 + open * 0.25;
+
+  vec3 col = uC * (0.55 + 0.6 * (p.y + 0.5));
+  for (int i = 0; i < 4; i++) {
+    float fi = float(i);
+    float x = p.x * (1.0 + fi * 0.3) + sin(p.y * (2.0 + fi * 0.8) + t * (1.0 + fi * 0.35) + fi * 2.1) * sway;
+    float ribbon = exp(-abs(sin(x * 3.2 + fi * 1.3 + t * 0.6)) * (4.5 + fi * 1.2));
+    float rays = 0.6 + 0.4 * sin(x * 34.0 + t * 2.0 + fi * 3.0);
+    float lift = smoothstep(-0.6, 0.1, p.y) * smoothstep(0.8, 0.05, p.y + fi * 0.06);
+    col += ramp(0.3 + fi * 0.22 + uAudio.w * 0.15) * ribbon * rays * lift * glow;
+  }
+  col += uB * exp(-pow(p.y + 0.5, 2.0) * 10.0) * (0.1 + kick * 0.1);
+  return col;
+}
+
+vec3 warp(vec2 p) {
+  float kick = uPulse.x;
+  float radius = length(p);
+  float angle = atan(p.y, p.x) + uWarp * uAudio.x * 1.2 * radius;
+
+  vec3 col = uC * (0.6 - radius * 0.5);
+  for (int i = 0; i < 3; i++) {
+    float fi = float(i);
+    float sectors = 36.0 + fi * 22.0;
+    float slice = 6.2831853 / sectors;
+    float sector = floor(angle / slice);
+    float across = fract(angle / slice) - 0.5;
+    float seed = sector * 1.37 + fi * 17.1;
+    float jitter = (hash(seed) - 0.5) * 0.7;
+    float z = fract(hash(seed + 3.3) + uTravel * (0.22 + fi * 0.1));
+    float head = z * z * 0.9;
+    float trailLength = (0.03 + z * 0.22) * (1.0 + kick * 1.2 + uAudio.x * 0.8);
+    float trail = (head - radius) / trailLength;
+    float inTrail = step(0.0, trail) * step(trail, 1.0) * (1.0 - trail);
+    float width = 0.0015 + z * 0.004;
+    float dist = abs(across - jitter) * slice * max(radius, 0.001);
+    float beam = smoothstep(width, 0.0, dist) * inTrail;
+    col += mix(uB, uA, z) * beam * (0.5 + z * 1.6);
+  }
+  col += uA * exp(-radius * 5.0) * (0.12 + kick * 0.5);
+  return col;
+}
+
+vec3 lasers(vec2 p) {
+  float kick = uPulse.x;
+  float spread = 0.1 + uAudio.w * 0.04 + kick * 0.03;
+  float sweep = 0.35 + uWarp * uAudio.x * 0.5;
+
+  vec3 col = uC * (0.6 - 0.5 * length(p));
+  for (int s = 0; s < 2; s++) {
+    float side = 1.0 - 2.0 * float(s);
+    vec2 rel = p - vec2(0.0, 0.62 * side);
+    float angle = atan(rel.x, -rel.y * side);
+    float fade = exp(-length(rel) * 0.65);
+    for (int k = 0; k < 9; k++) {
+      float fk = float(k) - 4.0;
+      float aim = fk * spread + sin(uTravel * 0.45 + fk * 0.8 + float(s) * 2.0) * sweep;
+      float off = abs(angle - aim);
+      float core = smoothstep(0.014, 0.0, off);
+      float halo = exp(-off * 14.0) * 0.22;
+      col += ramp(0.5 + fk * 0.1 + float(s) * 0.2) * (core * 1.5 + halo) * fade * (0.55 + kick * 1.0 + uAudio.y * 0.4);
+    }
+  }
+  return col;
+}
+
+vec3 bloom(vec2 p) {
+  float kick = uPulse.x;
+  float radius = length(p);
+  float angle = atan(p.y, p.x);
+
+  vec3 col = uC * (0.8 - radius * 0.8);
+  for (int i = 0; i < 5; i++) {
+    float fi = float(i);
+    float petals = 5.0 + fi * 2.0;
+    float direction = 1.0 - 2.0 * mod(fi, 2.0);
+    float lobe = 0.5 + 0.5 * cos(petals * angle + uTravel * (0.14 + fi * 0.05) * direction + fi);
+    float wobble = uWarp * uAudio.x * 0.08 * sin(angle * 3.0 + uTravel);
+    float ringRadius = (0.09 + fi * 0.1) * (0.55 + 0.45 * lobe + uAudio.z * 0.18) * (1.0 + kick * 0.1) + wobble;
+    float shine = exp(-abs(radius - ringRadius) * (70.0 - fi * 8.0));
+    col += ramp(fi / 4.0 + uAudio.y * 0.25) * shine * (0.45 + uAudio.y * 0.6 + kick * 0.5);
+  }
+  col += uA * exp(-radius * 8.0) * (0.18 + kick * 0.7);
+  return col;
+}
+
 vec3 backdrop(vec2 p) {
   return uC * (0.25 + 0.2 * uPulse.x) * (1.0 - length(p));
 }
@@ -160,6 +285,16 @@ void main() {
   col = strobe(p);
 #elif SCENE == 3
   col = rift(p);
+#elif SCENE == 5
+  col = bars(p);
+#elif SCENE == 6
+  col = aurora(p);
+#elif SCENE == 7
+  col = warp(p);
+#elif SCENE == 8
+  col = lasers(p);
+#elif SCENE == 9
+  col = bloom(p);
 #else
   col = backdrop(p);
 #endif

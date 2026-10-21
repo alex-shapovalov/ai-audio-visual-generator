@@ -1,4 +1,15 @@
-export const SCENES = ["portal", "grid", "strobe", "rift", "media"] as const
+export const SCENES = [
+  "portal",
+  "grid",
+  "strobe",
+  "rift",
+  "media",
+  "bars",
+  "aurora",
+  "warp",
+  "lasers",
+  "bloom",
+] as const
 export type SceneId = (typeof SCENES)[number]
 
 export type Section = "groove" | "breakdown" | "build" | "drop"

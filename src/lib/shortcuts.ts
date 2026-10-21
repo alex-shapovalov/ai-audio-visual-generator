@@ -1,6 +1,6 @@
 import { SCENES, type SceneId } from "@/lib/types"
 
-const SCENE_KEYS = ["1", "2", "3", "4", "5"]
+export const SCENE_KEYS: readonly string[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
 const TYPING_SELECTOR =
   "input, textarea, select, [contenteditable='true'], [role='combobox'], [role='listbox'], [role='textbox']"
 

@@ -6,8 +6,8 @@ switches to each track's saved look.
 
 - Listen-only. Inputs are never played back. Echo cancellation, noise suppression and auto gain are turned off
   so the analysis sees the raw signal.
-- Five scenes (Portal, Grid, Strobe, Rift, Media) driven by four band levels, a kick envelope, BPM and a
-  section guess (groove, breakdown, build, drop).
+- Ten scenes and twelve palettes, driven by four band levels, a kick envelope, BPM and a section guess
+  (groove, breakdown, build, drop).
 - Your own images and videos are stored in the browser (IndexedDB) and layered on any look.
 - Track recognition runs on your machine. You enroll your own files; only landmark hashes are kept, not audio.
 - An optional AI director (OpenRouter) suggests looks from a vibe prompt or a track's stats. A local keyword
@@ -34,8 +34,21 @@ Audio input needs a secure context. `localhost` and `127.0.0.1` count as secure.
 
 ## Using the deck
 
-The panel has three tabs. Keys: `1`-`5` pick a scene, `A` toggles auto cues, `H` hides the panel, `F` toggles
-fullscreen. Keys are ignored while you type in a field.
+The panel has three tabs. Keys: `1`-`9` and `0` pick a scene, `A` toggles auto cues, `H` hides the panel, `F`
+toggles fullscreen. Keys are ignored while you type in a field.
+
+| Key | Scene | What it looks like |
+|---|---|---|
+| `1` | Portal | A tunnel that opens up in breakdowns |
+| `2` | Grid | A perspective grid corridor |
+| `3` | Strobe | Concentric geometry. Its flashing bars need the strobe switch and the strobe master |
+| `4` | Rift | Glitching slices pushed around by the bass |
+| `5` | Media | Your own image or video full-frame. It shows the portal until you add media |
+| `6` | Bars | Mirrored equalizer columns that follow the four bands |
+| `7` | Aurora | Soft flowing light curtains |
+| `8` | Warp | Stars streaking out from the centre |
+| `9` | Lasers | Beams fanning from the top and bottom |
+| `0` | Bloom | A rotating mandala that swells on the kick |
 
 | Tab | What it does |
 |---|---|

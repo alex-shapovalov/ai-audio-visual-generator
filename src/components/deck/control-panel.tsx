@@ -23,7 +23,7 @@ export function ControlPanel({ deck, onHide }: ControlPanelProps) {
       <header className="flex items-center justify-between gap-3 px-4 pt-3 pb-2">
         <div>
           <h1 className="text-sm font-semibold tracking-wide">Afterimage</h1>
-          <p className="text-[0.7rem] text-muted-foreground">1–5 scenes · A auto · H hide · F fullscreen</p>
+          <p className="text-[0.7rem] text-muted-foreground">1–0 scenes · A auto · H hide · F fullscreen</p>
         </div>
         <Button type="button" size="sm" variant="ghost" onClick={onHide}>
           Hide

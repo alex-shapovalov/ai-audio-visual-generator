@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { POST } from "@/app/api/look/route"
 import type { LookResponse } from "@/lib/look-schema"
+import { SCENES } from "@/lib/types"
 
 const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 const TEST_KEY = "test-key-not-real"
@@ -152,6 +153,21 @@ describe("POST /api/look with OpenRouter", () => {
       trackStats: { durationSeconds: 312, bassShare: 0.556, trebleShare: 0.044 },
       uploadedMedia: MEDIA,
     })
+  })
+
+  it("describes every scene to the model", async () => {
+    fetchMock.mockResolvedValue(reply(modelLook()))
+    await call({ media: [] })
+    const body = JSON.parse(String(fetchMock.mock.calls[0][1]?.body))
+    const prompt: string = body.messages[0].content
+    for (const scene of SCENES) expect(prompt).toContain(`"${scene}"`)
+  })
+
+  it.each(["bars", "aurora", "warp", "lasers", "bloom"])("accepts the %s scene from the model", async (scene) => {
+    fetchMock.mockResolvedValue(reply(modelLook({ scene })))
+    const data = await json(await call({ prompt: "x", media: [] }))
+    expect(data.source).toBe("openrouter")
+    expect(data.look.scene).toBe(scene)
   })
 
   it("sends nulls for fields the caller omitted", async () => {

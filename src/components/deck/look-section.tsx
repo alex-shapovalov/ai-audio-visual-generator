@@ -16,7 +16,7 @@ export function LookSection({ deck }: LookSectionProps) {
   const needsMedia = look.scene === "media" && library.media.length === 0
 
   return (
-    <Section title="Look" hint="Keys 1–5 pick a scene">
+    <Section title="Look" hint="Keys 1–9 and 0 pick a scene">
       <SceneButtons value={look.scene} onChange={control.selectScene} showKeys />
       {needsMedia ? <Notice tone="info">The media scene shows the portal until you add media in the Media tab.</Notice> : null}
       <PaletteSwatches colors={look.colors} onChange={(colors) => control.patchLook({ colors })} />

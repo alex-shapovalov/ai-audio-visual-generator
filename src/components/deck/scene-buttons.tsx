@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { SCENE_KEYS } from "@/lib/shortcuts"
 import { SCENES, type SceneId } from "@/lib/types"
 
 const LABELS: Record<SceneId, string> = {
@@ -9,6 +10,11 @@ const LABELS: Record<SceneId, string> = {
   strobe: "Strobe",
   rift: "Rift",
   media: "Media",
+  bars: "Bars",
+  aurora: "Aurora",
+  warp: "Warp",
+  lasers: "Lasers",
+  bloom: "Bloom",
 }
 
 type SceneButtonsProps = {
@@ -28,12 +34,12 @@ export function SceneButtons({ value, onChange, showKeys = false }: SceneButtons
           variant={scene === value ? "default" : "outline"}
           aria-label={LABELS[scene]}
           aria-pressed={scene === value}
-          aria-keyshortcuts={String(index + 1)}
+          aria-keyshortcuts={SCENE_KEYS[index]}
           onClick={() => onChange(scene)}
           className="flex-col gap-0 px-1 py-0.5 h-9"
         >
           <span>{LABELS[scene]}</span>
-          {showKeys ? <span className="text-[0.6rem] opacity-60">{index + 1}</span> : null}
+          {showKeys ? <span className="text-[0.6rem] opacity-60">{SCENE_KEYS[index]}</span> : null}
         </Button>
       ))}
     </div>

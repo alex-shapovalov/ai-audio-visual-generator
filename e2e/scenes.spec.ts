@@ -1,5 +1,35 @@
 import { DeckPage } from "./deck-page"
 import { expect, test } from "./fixtures"
+import { startBrightnessSampler, stopBrightnessSampler } from "./generated-media"
+
+const DRAWING_SCENES: [string, string][] = [
+  ["1", "Portal"],
+  ["2", "Grid"],
+  ["3", "Strobe"],
+  ["4", "Rift"],
+  ["6", "Bars"],
+  ["7", "Aurora"],
+  ["8", "Warp"],
+  ["9", "Lasers"],
+  ["0", "Bloom"],
+]
+const PALETTE_NAMES = [
+  "Bone & Amber",
+  "Acid & Magenta",
+  "Cyan & Violet",
+  "Ember",
+  "Monochrome",
+  "Sunset",
+  "Glacier",
+  "Toxic",
+  "Royal",
+  "Crimson",
+  "Synthwave",
+  "Deep Sea",
+]
+const SCENE_SETTLE_MS = 1000
+const MEASURE_MS = 1000
+const MIN_MEAN_BRIGHTNESS = 10
 
 test("keys 1 to 5 select the scenes and pause auto cues", async ({ page }) => {
   const deck = new DeckPage(page)
@@ -20,6 +50,54 @@ test("keys 1 to 5 select the scenes and pause auto cues", async ({ page }) => {
 
   await expect(deck.autoSwitch()).not.toBeChecked()
   await expect(page.getByText("Manual: cues paused")).toBeVisible()
+})
+
+test("keys 6 to 9 and 0 select the newer scenes", async ({ page }) => {
+  const deck = new DeckPage(page)
+  await deck.open()
+
+  for (const [key, scene] of [
+    ["6", "Bars"],
+    ["7", "Aurora"],
+    ["8", "Warp"],
+    ["9", "Lasers"],
+    ["0", "Bloom"],
+  ]) {
+    await page.keyboard.press(key)
+    await expect(deck.sceneButton(scene)).toHaveAttribute("aria-pressed", "true")
+  }
+  await expect(deck.autoSwitch()).not.toBeChecked()
+})
+
+test("every scene draws visible output on the GPU", async ({ page }) => {
+  test.setTimeout(120_000)
+  const deck = new DeckPage(page)
+  await deck.open()
+  await deck.runDemo()
+
+  for (const [key, scene] of DRAWING_SCENES) {
+    await page.keyboard.press(key)
+    await expect(deck.sceneButton(scene)).toHaveAttribute("aria-pressed", "true")
+    await page.waitForTimeout(SCENE_SETTLE_MS)
+    await startBrightnessSampler(page)
+    await page.waitForTimeout(MEASURE_MS)
+    const samples = await stopBrightnessSampler(page)
+    const mean = samples.reduce((total, sample) => total + sample.level, 0) / samples.length
+    expect(mean, scene).toBeGreaterThan(MIN_MEAN_BRIGHTNESS)
+  }
+})
+
+test("every palette can be picked", async ({ page }) => {
+  const deck = new DeckPage(page)
+  await deck.open()
+
+  const swatches = page.getByRole("group", { name: "Palette" }).getByRole("button")
+  await expect(swatches).toHaveCount(PALETTE_NAMES.length)
+  for (const name of PALETTE_NAMES) {
+    await page.getByRole("button", { name, exact: true }).click()
+    await expect(page.getByRole("button", { name, exact: true })).toHaveAttribute("aria-pressed", "true")
+  }
+  await expect(deck.autoSwitch()).not.toBeChecked()
 })
 
 test("clicking a scene also takes manual control", async ({ page }) => {
