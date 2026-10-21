@@ -71,6 +71,41 @@ Things to know:
   click. The display refuses audio until it has had one.
 - Open only one display window. Nothing stops a second one, and both would answer the controls.
 
+## Control from a phone or tablet
+
+The remote is a small second server on its own port. The app itself keeps listening on localhost only.
+
+```bash
+pnpm build
+pnpm remote
+```
+
+`pnpm remote` runs the app on `127.0.0.1:4617` as usual, plus a relay on port 4618 that listens on your network.
+The terminal prints a pairing link, and the controls window shows the same link as a QR code under **Control from
+a phone or tablet**. Scan it with a phone on the same network. The phone opens a remote with the meters, scenes,
+palettes, sliders, auto cues and a line saying what is recognized. The display window still has to be open on the
+laptop.
+
+What a phone can and cannot do:
+
+- It can change the scene, palette, media layer, bass warp, media mix, kaleidoscope, strobe on a look, and auto
+  cues. It can switch the strobe master off, never on.
+- It cannot choose or start an input, play a file, add media or tracks, or ask the AI for a look. Do those in the
+  controls window.
+
+How it is protected:
+
+- The relay does not serve the app. `/api/look` and your OpenRouter key are never reachable from the network.
+- The relay trusts connections from this computer. Anything else must present the pairing token, which is random
+  each time `pnpm remote` starts. Set `AFTERIMAGE_REMOTE_TOKEN` to keep the same one. The link sets a cookie that
+  is HttpOnly and SameSite=Strict, and write requests from another website are refused.
+- From the app it forwards only the remote page and its scripts, and it passes on only the commands listed above.
+- The link is plain HTTP. Anyone who can read traffic on your network can read the token. Use a network you
+  trust, and stop `pnpm remote` when you do not need it.
+
+Ports are `AFTERIMAGE_RELAY_PORT` (4618) and `AFTERIMAGE_NEXT_PORT` (4617). `pnpm relay` starts only the relay,
+for when the app is already running.
+
 ## Using the deck
 
 The panel has three tabs, in `/` and in `/controls`. Keys: `1`-`9` and `0` pick a scene, `A` toggles auto cues,
@@ -157,6 +192,8 @@ Kick detection never fires twice within 240 ms, which also caps strobe flashes a
 |---|---|
 | `pnpm dev` | Next dev server |
 | `pnpm build`, `pnpm start` | Production build and server |
+| `pnpm remote` | Production server plus the phone relay. Needs `pnpm build` first |
+| `pnpm relay` | Only the phone relay |
 | `pnpm typecheck` | `next typegen` then `tsc --noEmit` |
 | `pnpm lint` | ESLint |
 | `pnpm test` | Vitest |
@@ -188,8 +225,8 @@ stale wasm in this checkout's build. Run `cargo clean` before rebuilding if you 
 | Suite | Command | Covers |
 |---|---|---|
 | Rust | `cargo test --workspace` | DSP, matcher, beat guard, CLI, and `parity.rs`, which pins values captured from the original TypeScript implementation |
-| Vitest | `pnpm test` | The wasm boundary, matcher worker protocol, IndexedDB, look schema and heuristic, `/api/look`, renderer look state |
-| Playwright | `pnpm test:e2e` | The deck in Chromium: scenes, media, enrollment, recognition, manual override, describe a look, mobile layout, strobe rate, and the display and controls windows working together |
+| Vitest | `pnpm test` | The wasm boundary, matcher worker protocol, IndexedDB, look schema and heuristic, `/api/look`, renderer look state, and the phone relay (command allow-list, pairing, access rules, stream fan-out) |
+| Playwright | `pnpm test:e2e` | The deck in Chromium: scenes, media, enrollment, recognition, manual override, describe a look, mobile layout, strobe rate, the display and controls windows together, and a phone paired through this computer's network address |
 
 Notes:
 
@@ -202,6 +239,8 @@ Notes:
   The suite has only been run on an Apple silicon Mac.
 - The e2e suite listens on port 4627 and builds the app first. It generates `demo-audio/` on the first run,
   which uses `cargo`, so Rust must be installed. The fake microphone plays `demo-dubstep-140.wav`.
+- The e2e suite also starts the phone relay on port 4637. The phone tests pair through this computer's own network
+  address, so they are skipped on a machine with no network address.
 - The e2e strobe test measures the on-screen flash rate. With the guard lowered to 60 ms it fails.
 
 ## Safety
@@ -229,6 +268,9 @@ within 240 ms, so they stay at about four per second or less. Warn your audience
 - The two-window mode was tested with Chromium's fake audio device and windows on one machine. Whether a real
   browser asks for microphone permission a second time in the display window, and how it behaves across two
   physical monitors, has not been checked.
+- The phone remote was tested with Chromium standing in for the phone, connecting to this computer's network
+  address. It has not been tried on a real phone or tablet. Some guest and venue Wi-Fi networks stop devices from
+  reaching each other, and the remote cannot work there.
 - `/api/look` has no authentication or rate limiting. Run it on localhost or add both before deploying.
 
 ## Status

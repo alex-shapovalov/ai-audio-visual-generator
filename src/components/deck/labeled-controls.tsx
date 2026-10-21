@@ -30,17 +30,18 @@ type LabeledSwitchProps = {
   label: string
   description?: string
   checked: boolean
+  disabled?: boolean
   onChange: (checked: boolean) => void
 }
 
-export function LabeledSwitch({ label, description, checked, onChange }: LabeledSwitchProps) {
+export function LabeledSwitch({ label, description, checked, disabled = false, onChange }: LabeledSwitchProps) {
   return (
     <div className="flex items-start justify-between gap-4">
       <div className="flex flex-col gap-0.5">
         <span className="text-sm">{label}</span>
         {description ? <span className="text-xs text-muted-foreground">{description}</span> : null}
       </div>
-      <Switch aria-label={label} checked={checked} onCheckedChange={onChange} />
+      <Switch aria-label={label} checked={checked} disabled={disabled} onCheckedChange={onChange} />
     </div>
   )
 }

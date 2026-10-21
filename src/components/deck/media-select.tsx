@@ -6,7 +6,7 @@ import type { MediaItem } from "@/lib/types"
 const NONE = "none"
 
 type MediaSelectProps = {
-  media: readonly MediaItem[]
+  media: readonly Pick<MediaItem, "id" | "name">[]
   value: string | null
   onChange: (mediaId: string | null) => void
 }

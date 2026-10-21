@@ -1,4 +1,4 @@
-import type { Frame, Look, MatchStatus, SceneId, SourceKind } from "@/lib/types"
+import type { Frame, Look, MatchStatus, MediaKind, SceneId, SourceKind } from "@/lib/types"
 
 export const CHANNEL_NAME = "afterimage"
 
@@ -30,6 +30,8 @@ export type DisplaySnapshot = {
   runtimeError: string | null
   matcherError: string | null
   mediaError: string | null
+  media: { id: string; name: string; kind: MediaKind }[]
+  cues: { id: string; title: string }[]
 }
 
 export type Message =

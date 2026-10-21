@@ -97,6 +97,30 @@ describe("RemoteChannel", () => {
     expect(() => opened.announceLibraryChange()).not.toThrow()
   })
 
+  it("hands every published snapshot to its taps, and stops after a tap is removed", () => {
+    const channel = connect()
+    const seen: unknown[] = []
+    const untap = channel.tapSnapshots((snapshot) => seen.push(snapshot))
+    const first = { auto: true } as never
+    const second = { auto: false } as never
+
+    channel.publish(first)
+    untap()
+    channel.publish(second)
+
+    expect(seen).toEqual([first])
+  })
+
+  it("delivers an injected message to its own listeners", () => {
+    const channel = connect()
+    const heard: Message[] = []
+    channel.subscribe((message) => heard.push(message))
+
+    channel.inject({ kind: "command", command: { type: "demo" } })
+
+    expect(heard).toEqual([{ kind: "command", command: { type: "demo" } }])
+  })
+
   it("can be reopened after a close", async () => {
     const controls = connect()
     const display = connect()

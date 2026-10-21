@@ -3,6 +3,7 @@
 import { useEffect, useEffectEvent } from "react"
 import type { BusyAction } from "@/components/deck/use-busy-action"
 import type { useEngineSource } from "@/components/deck/use-engine-source"
+import type { Library } from "@/components/deck/use-library"
 import type { useLiveEngine } from "@/components/deck/use-live-engine"
 import { AUDIO_LOCKED_MESSAGE, hasUserActivation } from "@/lib/activation"
 import { emptyFrame } from "@/lib/types"
@@ -16,9 +17,10 @@ type Options = {
   live: ReturnType<typeof useLiveEngine>
   engineSource: ReturnType<typeof useEngineSource>
   action: BusyAction
+  library: Pick<Library, "media" | "cues">
 }
 
-export const useDisplayBridge = ({ channel, live, engineSource, action }: Options) => {
+export const useDisplayBridge = ({ channel, live, engineSource, action, library }: Options) => {
   const startAudio = (start: () => Promise<void>) => {
     if (hasUserActivation()) {
       void start()
@@ -80,6 +82,8 @@ export const useDisplayBridge = ({ channel, live, engineSource, action }: Option
       runtimeError: live.error,
       matcherError: live.matcherError,
       mediaError: live.mediaError,
+      media: library.media.map(({ id, name, kind }) => ({ id, name, kind })),
+      cues: library.cues.map(({ id, title }) => ({ id, title })),
     })
   })
 
@@ -109,5 +113,7 @@ export const useDisplayBridge = ({ channel, live, engineSource, action }: Option
     live.error,
     live.matcherError,
     live.mediaError,
+    library.media,
+    library.cues,
   ])
 }

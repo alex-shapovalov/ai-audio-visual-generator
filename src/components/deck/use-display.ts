@@ -3,6 +3,7 @@
 import type { RefObject } from "react"
 import { useBusyAction } from "@/components/deck/use-busy-action"
 import { useDisplayBridge } from "@/components/deck/use-display-bridge"
+import { useDisplayRelay } from "@/components/deck/use-display-relay"
 import { useEngineSource } from "@/components/deck/use-engine-source"
 import { useLibrary } from "@/components/deck/use-library"
 import { useLibrarySync } from "@/components/deck/use-library-sync"
@@ -18,7 +19,8 @@ export const useDisplay = (canvasRef: RefObject<HTMLCanvasElement | null>) => {
   const live = useLiveEngine(canvasRef, library)
   const action = useBusyAction()
   const engineSource = useEngineSource(live.runtime, live.beforeSourceChange, action)
-  useDisplayBridge({ channel, live, engineSource, action })
+  useDisplayBridge({ channel, live, engineSource, action, library })
+  useDisplayRelay(channel)
   useShortcuts({
     onScene: live.control.selectScene,
     onToggleAuto: live.toggleAuto,

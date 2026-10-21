@@ -1,4 +1,4 @@
-import type { BrowserContext, Page } from "@playwright/test"
+import type { Page } from "@playwright/test"
 import { DeckPage } from "./deck-page"
 import { DEMO } from "./demo-audio"
 import { expect, test } from "./fixtures"
@@ -9,43 +9,12 @@ import {
   stopBrightnessSampler,
   type Rgb,
 } from "./generated-media"
+import { openControls, openDisplay, openUntouchedDisplay, startDisplay } from "./windows"
 
 const RECOGNITION_TIMEOUT = 25_000
 const MIN_MEAN_BRIGHTNESS = 10
 const SCENE_SETTLE_MS = 1000
 const MEASURE_MS = 1000
-
-const openControls = async (page: Page) => {
-  await page.goto("/controls")
-  await expect(page.getByRole("heading", { name: "Afterimage controls" })).toBeVisible()
-  return new DeckPage(page)
-}
-
-const watchConsole = (page: Page, problems: string[]) => {
-  page.on("console", (message) => {
-    if (["error", "warning"].includes(message.type())) problems.push(`display ${message.type()}: ${message.text()}`)
-  })
-  page.on("pageerror", (error) => problems.push(`display pageerror: ${error.message}`))
-}
-
-const openUntouchedDisplay = async (context: BrowserContext, problems: string[]) => {
-  const display = await context.newPage()
-  watchConsole(display, problems)
-  await display.goto("/display")
-  return display
-}
-
-const openDisplay = async (context: BrowserContext, problems: string[]) => {
-  const display = await openUntouchedDisplay(context, problems)
-  await expect(display.getByLabel("Visuals")).toBeVisible()
-  return display
-}
-
-const startDisplay = async (display: Page) => {
-  const start = display.getByRole("button", { name: "Start display" })
-  await start.click()
-  await expect(start).toBeHidden()
-}
 
 const meanBrightness = async (display: Page) => {
   await startBrightnessSampler(display)

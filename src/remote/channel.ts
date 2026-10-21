@@ -5,10 +5,14 @@ type Listener = (message: Message) => void
 export class RemoteChannel {
   private channel: BroadcastChannel | null = null
   private readonly listeners = new Set<Listener>()
+  private readonly snapshotTaps = new Set<(snapshot: DisplaySnapshot) => void>()
 
   readonly sendCommand = (command: Command) => this.send({ kind: "command", command })
 
-  readonly publish = (snapshot: DisplaySnapshot) => this.send({ kind: "snapshot", snapshot })
+  readonly publish = (snapshot: DisplaySnapshot) => {
+    this.send({ kind: "snapshot", snapshot })
+    this.snapshotTaps.forEach((tap) => tap(snapshot))
+  }
 
   readonly announceLibraryChange = () => this.send({ kind: "library-changed" })
 
@@ -37,5 +41,16 @@ export class RemoteChannel {
     return () => {
       this.listeners.delete(listener)
     }
+  }
+
+  tapSnapshots(tap: (snapshot: DisplaySnapshot) => void) {
+    this.snapshotTaps.add(tap)
+    return () => {
+      this.snapshotTaps.delete(tap)
+    }
+  }
+
+  inject(message: Message) {
+    this.listeners.forEach((listener) => listener(message))
   }
 }
