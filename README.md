@@ -162,9 +162,10 @@ sends. Never commit a key. If a key has been pasted anywhere it should not have 
 | Variable | Purpose | Default |
 |---|---|---|
 | `OPENROUTER_API_KEY` | Key used by `/api/look` | none (the local heuristic is used) |
-| `OPENROUTER_MODEL` | Model used by `/api/look` | `openai/gpt-4o-mini` |
+| `OPENROUTER_MODEL` | Model used by `/api/look` | `qwen/qwen3.8-omni-flash` in `.env.example`, `openai/gpt-4o-mini` when unset |
 
-`.env.example` sets `OPENROUTER_MODEL` to another model, so copying it changes the model.
+`.env.example` selects `qwen/qwen3.8-omni-flash` (Qwen3.8 Omni Flash), so following the quick start uses it. If
+`OPENROUTER_MODEL` is not set, the route falls back to `openai/gpt-4o-mini`.
 
 The automated tests never call OpenRouter. The e2e server starts with an empty key.
 
