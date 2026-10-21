@@ -43,6 +43,7 @@ next-env.d.ts
 # rust
 /target/
 /.toolchain/
+.toolchain/
 
 # generated demo audio
 /demo-audio/
